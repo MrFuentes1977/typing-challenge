@@ -1,1 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRUEBA DE MECANOGRAFÍA · SpeedTyper</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        
+        body {
+            background: linear-gradient(135deg, #0b1f2e 0%, #1b3b4f 100%);
+            min-height: 100vh;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
 
+        .container {
+            background: rgba(22, 40, 56, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 42px;
+            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.6);
+            max-width: 900px; width: 100%; padding: 40px; border: 1px solid #3f6b89;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(145deg, #f2e9d0, #c4e0ff);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px; border-bottom: 2px solid #2d607c; padding-bottom: 10px;
+        }
+
+        /* Panel de Calificación */
+        .grade-panel {
+            background: linear-gradient(115deg, #1a3a52, #0d2131);
+            border-radius: 24px; padding: 20px; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-left: 8px solid #52a5d6; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        .grade-number { font-size: 3rem; font-weight: 900; color: #fff; line-height: 1; }
+        .grade-label { font-size: 1.2rem; font-weight: 700; text-transform: uppercase; margin-top: 5px; }
+
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;
+        }
+        .stat-card {
+            background: #0e2637; border-radius: 20px; padding: 15px; text-align: center; border: 1px solid #2e6c8f;
+        }
+        .stat-label { font-size: 0.7rem; color: #9bbad0; text-transform: uppercase; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; color: #e2f0ff; }
+
+        /* CORRECCIÓN: Contenedor elegante y flexible */
+        .text-practice {
+            background: #102d3ed9;
+            border: 2px solid #317199;
+            border-radius: 24px;
+            padding: 25px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            line-height: 1.6;
+            color: #e6f3ff;
+            font-family: 'Fira Code', monospace;
+            text-align: justify;
+            /* Ajustes para evitar que el texto se salga */
+            width: 100%;
+            height: auto;
+            min-height: 100px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .char-correct { color: #b6ffc0; background-color: #1b4c3b80; border-radius: 3px; }
+        .char-incorrect { color: #ffbcaf; background-color: #7a2f2fcc; text-decoration: underline wavy #ff7b7b; border-radius: 3px; }
+        .char-pending { color: #afcdff; opacity: 0.4; }
+        .char-current { background-color: #cabf5b; color: #121f2b; font-weight: bold; border-radius: 3px; }
+
+        textarea {
+            width: 100%; padding: 20px; font-size: 1.2rem; border: 3px solid #24668b;
+            border-radius: 20px; background: #112936; color: #ebf8ff;
+            font-family: 'Fira Code', monospace; resize: none; min-height: 120px; outline: none;
+        }
+
+        .button-group { display: flex; gap: 15px; margin-top: 20px; }
+        .btn { padding: 15px; border-radius: 15px; font-weight: 700; cursor: pointer; border: none; flex: 1; text-transform: uppercase; transition: 0.3s; }
+        .btn-primary { background: #1d6291; color: white; box-shadow: 0 4px 0 #0b3d5e; }
+        .btn-secondary { background: #403753; color: #f0e9ff; box-shadow: 0 4px 0 #2a2436; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .bajo { color: #ff7b7b; }
+        .basico { color: #ffce7b; }
+        .alto { color: #7beaff; }
+        .superior { color: #b6ffc0; }
+
+        .footer { text-align: center; color: #88adcc; font-size: 0.8rem; margin-top: 30px; border-top: 1px solid #2d607c; padding-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⌨️ TYPING CHALLENGE</h1>
+    
+    <div class="grade-panel" id="gradePanel">
+        <div class="grade-display">
+            <div class="stat-label">Calificación Final</div>
+            <div id="finalGrade" class="grade-number">0.0</div>
+            <div id="performanceText" class="grade-label">ESPERANDO PRUEBA</div>
+        </div>
+        <div style="text-align: right;">
+            <div class="stat-label">Comentario Final</div>
+            <div id="statusBadge" style="font-weight: bold; font-size: 1.1rem; color: #88adcc;">SIN INICIAR</div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">PPM</div>
+            <div id="wpmValue" class="stat-value">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Precisión Real</div>
+            <div class="stat-value"><span id="accuracyValue">100</span>%</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Tiempo</div>
+            <div class="stat-value"><span id="timeValue">0.0</span>s</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Teclas Pulsadas</div>
+            <div id="hitsValue" class="stat-value">0</div>
+        </div>
+    </div>
+
+    <div class="text-practice" id="coloredText"></div>
+
+    <textarea id="userInput" placeholder="Haga clic en 'Iniciar prueba'..." disabled spellcheck="false"></textarea>
+
+    <div class="button-group">
+        <button class="btn btn-primary" id="startBtn">▶ Iniciar prueba</button>
+        <button class="btn btn-secondary" id="resetBtn" disabled>↺ Reintentar</button>
+    </div>
+
+    <div class="footer">
+        <strong>Ing. Pedro Javier Fuentes Parada</strong><br>
+        Colegio Integral San Paulo - Informática
+    </div>
+</div>
+
+<script>
+    (function() {
+        const TEXTO_ORIGINAL = `Era sábado y el grupo de amigos decidió reunirse en la cancha del barrio. "Hoy jugamos hasta que caiga la noche" dijo Laura con una sonrisa. El resto era simple: formar equipos y competir con reglas inventadas. Cada punto ganado se celebraba con gritos y símbolos en la pizarra: #Victoria, &Fuerza, (Unión=Respeto). Las risas llenaron el lugar, y al final todos entendieron que lo importante no era ganar, sino compartir momentos que quedaban grabados como recuerdos únicos.`;
+        
+        const userTextarea = document.getElementById('userInput');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const wpmSpan = document.getElementById('wpmValue');
+        const accuracySpan = document.getElementById('accuracyValue');
+        const timeSpan = document.getElementById('timeValue');
+        const hitsSpan = document.getElementById('hitsValue');
+        const coloredTextContainer = document.getElementById('coloredText');
+        const finalGradeSpan = document.getElementById('finalGrade');
+        const performanceText = document.getElementById('performanceText');
+        const statusBadge = document.getElementById('statusBadge');
+        const gradePanel = document.getElementById('gradePanel');
+
+        let startTime = null;
+        let timerInterval = null;
+        let testActive = false;
+        let totalPulsaciones = 0;
+        let erroresCometidos = 0;
+
+        // Anti-Trampa: Bloquear pegado
+        userTextarea.addEventListener('paste', e => e.preventDefault());
+
+        function renderText() {
+            const escrito = userTextarea.value;
+            let html = '';
+            for (let i = 0; i < TEXTO_ORIGINAL.length; i++) {
+                let char = TEXTO_ORIGINAL[i] === ' ' ? '&nbsp;' : TEXTO_ORIGINAL[i];
+                if (i < escrito.length) {
+                    html += `<span class="${escrito[i] === TEXTO_ORIGINAL[i] ? 'char-correct' : 'char-incorrect'}">${char}</span>`;
+                } else if (i === escrito.length && testActive) {
+                    html += `<span class="char-current">${char}</span>`;
+                } else {
+                    html += `<span class="char-pending">${char}</span>`;
+                }
+            }
+            coloredTextContainer.innerHTML = html;
+        }
+
+        userTextarea.addEventListener('keydown', (e) => {
+            if (!testActive) return;
+            const ignorar = ['Shift', 'Control', 'Alt', 'CapsLock', 'Tab', 'Enter'];
+            if (!ignorar.includes(e.key)) {
+                totalPulsaciones++;
+                const pos = userTextarea.value.length;
+                // Penaliza si la tecla no coincide O si se usa Backspace (cuenta como pulsación real para bajar precisión)
+                if (e.key !== TEXTO_ORIGINAL[pos] && e.key !== 'Backspace') {
+                    erroresCometidos++;
+                }
+                hitsSpan.innerText = totalPulsaciones;
+            }
+        });
+
+        userTextarea.addEventListener('input', () => {
+            if (!testActive) return;
+            if (!startTime) startTime = Date.now();
+
+            const escrito = userTextarea.value;
+            const elapsed = (Date.now() - startTime) / 1000;
+            const wpm = Math.round((escrito.length / 5) / (elapsed / 60)) || 0;
+            const precision = totalPulsaciones > 0 ? ((totalPulsaciones - erroresCometidos) / totalPulsaciones) * 100 : 100;
+
+            wpmSpan.innerText = wpm;
+            accuracySpan.innerText = Math.max(0, precision).toFixed(1);
+            timeSpan.innerText = elapsed.toFixed(1);
+
+            renderText();
+            if (escrito === TEXTO_ORIGINAL) finalizarPrueba(wpm, precision);
+        });
+
+        function finalizarPrueba(wpm, precision) {
+            testActive = false;
+            userTextarea.disabled = true;
+            startBtn.disabled = false;
+            clearInterval(timerInterval);
+
+            // CÁLCULO DE NOTA (1.0 - 10.0)
+            let notaPrecision = (precision / 100) * 10;
+            let notaVelocidad = Math.min(10, (wpm / 40) * 10);
+            let notaFinal = (notaPrecision * 0.6) + (notaVelocidad * 0.4);
+            
+            notaFinal = Math.max(1.0, Math.min(10, notaFinal)).toFixed(1);
+            finalGradeSpan.innerText = notaFinal;
+
+            performanceText.classList.remove('bajo', 'basico', 'alto', 'superior');
+            if (notaFinal < 7.0) {
+                performanceText.innerText = "Desempeño Bajo";
+                performanceText.classList.add('bajo');
+                statusBadge.innerText = "POR MEJORAR";
+                statusBadge.style.color = "#ff7b7b";
+                gradePanel.style.borderLeftColor = "#ff7b7b";
+            } else if (notaFinal < 8.0) {
+                performanceText.innerText = "Desempeño Básico";
+                performanceText.classList.add('basico');
+                statusBadge.innerText = "APROBADO";
+                statusBadge.style.color = "#ffce7b";
+                gradePanel.style.borderLeftColor = "#ffce7b";
+            } else if (notaFinal < 9.0) {
+                performanceText.innerText = "Desempeño Alto";
+                performanceText.classList.add('alto');
+                statusBadge.innerText = "SOBRESALIENTE";
+                statusBadge.style.color = "#7beaff";
+                gradePanel.style.borderLeftColor = "#7beaff";
+            } else {
+                performanceText.innerText = "Desempeño Superior";
+                performanceText.classList.add('superior');
+                statusBadge.innerText = "EXCELENCIA";
+                statusBadge.style.color = "#b6ffc0";
+                gradePanel.style.borderLeftColor = "#b6ffc0";
+            }
+        }
+
+        startBtn.addEventListener('click', () => {
+            testActive = true;
+            userTextarea.disabled = false;
+            userTextarea.value = '';
+            userTextarea.focus();
+            startTime = null;
+            totalPulsaciones = 0;
+            erroresCometidos = 0;
+            wpmSpan.innerText = '0';
+            accuracySpan.innerText = '100';
+            timeSpan.innerText = '0.0';
+            hitsSpan.innerText = '0';
+            finalGradeSpan.innerText = '0.0';
+            performanceText.innerText = "PROCESANDO...";
+            statusBadge.innerText = "EN CURSO";
+            startBtn.disabled = true;
+            resetBtn.disabled = false;
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (startTime && testActive) {
+                    timeSpan.innerText = ((Date.now() - startTime) / 1000).toFixed(1);
+                }
+            }, 100);
+            renderText();
+        });
+
+        resetBtn.addEventListener('click', () => startBtn.click());
+        renderText();
+    })();
+</script>
+</body>
+</html>
